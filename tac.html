@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tic-Tac-Toe Game</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="tac.css" rel="stylesheet">
+
+    
+
+</head>
+<body>
+  <div class="container text-center mt-5">
+    <h1>Tic-Tac-Toe</h1>
+    <div id="game-status" class="mb-3"></div>
+    <div id="game-board" class="row justify-content-center"></div>
+    <button id="reset-btn" class="btn btn-danger mt-3">Reset Game</button>
+  </div>
+
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script>
+    $(document).ready(function() {
+      let board = ["", "", "", "", "", "", "", "", ""];
+      let currentPlayer = "X";
+      let gameActive = true;
+      let againstComputer = false;
+
+      const winningConditions = [
+        [0, 1, 2],
+        [3, 4, 5],
+        [6, 7, 8],
+        [0, 3, 6],
+        [1, 4, 7],
+        [2, 5, 8],
+        [0, 4, 8],
+        [2, 4, 6]
+      ];
+
+      function initGame() {
+        let boardHTML = '';
+        for (let i = 0; i < 9; i++) {
+          boardHTML += `<div class="cell" data-cell-index="${i}"></div>`;
+        }
+        $('#game-board').html(boardHTML);
+        $('#game-status').text(`Player ${currentPlayer}'s turn`);
+      }
+
+      function checkWinner() {
+        for (let i = 0; i < winningConditions.length; i++) {
+          const [a, b, c] = winningConditions[i];
+          if (board[a] && board[a] === board[b] && board[a] === board[c]) {
+            gameActive = false;
+            $('#game-status').text(`Player ${currentPlayer} wins!`);
+            return true;
+          }
+        }
+
+        if (!board.includes("")) {
+          gameActive = false;
+          $('#game-status').text('Draw!');
+          return true;
+        }
+
+        return false;
+      }
+
+      function handleCellClick(event) {
+        const clickedCell = $(event.target);
+        const cellIndex = clickedCell.attr('data-cell-index');
+
+        if (board[cellIndex] === "" && gameActive) {
+          board[cellIndex] = currentPlayer;
+          clickedCell.text(currentPlayer);
+          if (!checkWinner()) {
+            currentPlayer = currentPlayer === "X" ? "O" : "X";
+            $('#game-status').text(`Player ${currentPlayer}'s turn`);
+
+            if (againstComputer && currentPlayer === "O") {
+              setTimeout(computerMove, 500);
+            }
+          }
+        }
+      }
+
+      function computerMove() {
+        let availableCells = [];
+        for (let i = 0; i < board.length; i++) {
+          if (board[i] === "") availableCells.push(i);
+        }
+
+        if (availableCells.length > 0) {
+          const randomIndex = availableCells[Math.floor(Math.random() * availableCells.length)];
+          board[randomIndex] = "O";
+          $(`[data-cell-index="${randomIndex}"]`).text("O");
+
+          if (!checkWinner()) {
+            currentPlayer = "X";
+            $('#game-status').text(`Player ${currentPlayer}'s turn`);
+          }
+        }
+      }
+
+      function resetGame() {
+        board = ["", "", "", "", "", "", "", "", ""];
+        currentPlayer = "X";
+        gameActive = true;
+        initGame();
+      }
+
+      $(document).on('click', '.cell', handleCellClick);
+      $('#reset-btn').on('click', resetGame);
+
+      initGame();
+    });
+  </script>
+</body>
+</html>
